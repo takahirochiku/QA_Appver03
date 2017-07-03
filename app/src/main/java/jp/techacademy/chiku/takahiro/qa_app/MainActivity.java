@@ -22,6 +22,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,6 +120,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+
+        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+        dataBaseReference.child("aaaa").child("1").setValue("こんにちは!");
+        dataBaseReference.child("aaaa").child("2").setValue("Firebase");
+        dataBaseReference.child("aaaa").child("3").setValue("なかなか難しいですね");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
