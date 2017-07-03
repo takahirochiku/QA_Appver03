@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -51,13 +52,13 @@ public class LoginActivity extends AppCompatActivity {
         // FirebaseAuthのオブジェクトを取得する
         mAuth = FirebaseAuth.getInstance();
 
-        // アカウント作成処理のリスナー
         mCreateAccountListener = new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     // 成功した場合
                     // ログインを行う
+                    Log.d("debug",  "成功した場合ログインを行う");
                     String email = mEmailEditText.getText().toString();
                     String password = mPasswordEditText.getText().toString();
                     login(email, password);
@@ -65,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     // 失敗した場合
                     // エラーを表示する
+                    Log.d("debug",  "失敗した場合エラーを表示する");
                     View view = findViewById(android.R.id.content);
                     Snackbar.make(view, "アカウント作成に失敗しました", Snackbar.LENGTH_LONG).show();
 

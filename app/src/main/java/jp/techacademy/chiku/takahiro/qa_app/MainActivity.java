@@ -137,19 +137,19 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // ログイン済みのユーザーを取得する
-                //FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                //if (user == null) {
+                if (user == null) {
                     // ログインしていなければログイン画面に遷移させる
-                   //Intent intent = new Intent(getApplicationContext(), LoginActivity.class);startActivity(intent);
-                //} else {
+                   Intent intent = new Intent(getApplicationContext(), LoginActivity.class);startActivity(intent);
+                } else {
                     // ジャンルを渡して質問作成画面を起動する
                     Intent intent = new Intent(getApplicationContext(), QuestionSendActivity.class);
                     intent.putExtra("genre", mGenre);
                     startActivity(intent);
                 }
 
-            //}
+            }
         });
 
         // ナビゲーションドロワーの設定

@@ -3,6 +3,7 @@
     package="jp.techacademy.chiku.takahiro.qa_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -21,7 +22,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".LoginActivity" />
-        <activity android:name=".SettingActivity"></activity>
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".QuestionSendActivity" />
+        <activity android:name=".QuestionDetailActivity" />
+        <activity android:name=".AnswerSendActivity"></activity>
     </application>
 
 </manifest>
