@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
+    private DatabaseReference mLikeRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, mLike, bytes, answerArrayList);
             mQuestionArrayList.add(question);
             mAdapter.notifyDataSetChanged();
         }
@@ -199,6 +200,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                 mGenreRef.addChildEventListener(mEventListener);
+
+                if (mLikeRef != null){
+                    mLikeRef.removeEventListener(mEventListener);
+                }
+                mLikeRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mLike));
+                mLikeRef.addChildEventListener(mEventListener);
                 return true;
             }
         });
