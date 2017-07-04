@@ -15,20 +15,24 @@
         android:layout_height="wrap_content"
         android:id="@+id/emailText"
         android:hint="メールアドレス"
+        android:inputType="textNoSuggestions"
         android:layout_weight="1" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
+        android:inputType="textNoSuggestions"
         android:hint="パスワード(6文字以上)"
         android:id="@+id/passwordText"
         android:layout_weight="1" />
+
+    <!--android:inputType="textPassword"-->
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="表示名"
+        android:inputType="textNoSuggestions"
         android:id="@+id/nameText"
         android:layout_weight="1" />
 

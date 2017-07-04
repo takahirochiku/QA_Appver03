@@ -36,6 +36,8 @@ public class AnswerSendActivity extends AppCompatActivity implements View.OnClic
         mQuestion = (Question) extras.get("question");
 
         // UIの準備
+        setTitle("回答作成");
+
         mAnswerEditText = (EditText) findViewById(R.id.answerEditText);
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("投稿中...");

@@ -14,6 +14,7 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,10 +28,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static jp.techacademy.chiku.takahiro.qa_app.R.id.parent;
+
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private int mGenre = 0;
+    private int mLike= 0;
 
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
@@ -176,14 +180,48 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_compter) {
                     mToolbar.setTitle("コンピューター");
                     mGenre = 4;
+                }else if (id == R.id.nav_like) {
+                    mToolbar.setTitle("お気に入り");
+                    mLike = 1;
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
+
+                // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+                mQuestionArrayList.clear();
+                mAdapter.setQuestionArrayList(mQuestionArrayList);
+                mListView.setAdapter(mAdapter);
+
+                // 選択したジャンルにリスナーを登録する
+                if (mGenreRef != null) {
+                    mGenreRef.removeEventListener(mEventListener);
+                }
+                mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                mGenreRef.addChildEventListener(mEventListener);
                 return true;
             }
         });
-    }
+
+    // Firebase
+    mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+    // ListViewの準備
+    mListView = (ListView) findViewById(R.id.listView);
+    mAdapter = new QuestionsListAdapter(this);
+    mQuestionArrayList = new ArrayList<Question>();
+        mAdapter.notifyDataSetChanged();
+
+     mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // Questionのインスタンスを渡して質問詳細画面を起動する
+            Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
+            intent.putExtra("question", mQuestionArrayList.get(position));
+            startActivity(intent);
+        }
+    });
+}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -201,6 +239,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
+            startActivity(intent);
             return true;
         }
 

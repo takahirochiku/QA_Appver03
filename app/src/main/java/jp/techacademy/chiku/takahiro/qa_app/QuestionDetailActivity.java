@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,6 +22,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     private ListView mListView;
     private Question mQuestion;
+    private int mLike;
+    private Button mLikeButton;
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
@@ -82,9 +85,12 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
         // ListViewの準備
         mListView = (ListView) findViewById(R.id.listView);
+
         mAdapter = new QuestionDetailListAdapter(this, mQuestion);
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
+
+        mLikeButton = (Button) findViewById(R.id.likeButton);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -99,8 +105,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     intent.putExtra("question", mQuestion);
                     startActivity(intent);
                 } else {
-                    // Questionを渡して回答作成画面を起動する
-                    // TODO:
+                    Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
+                    intent.putExtra("question", mQuestion);
+                    startActivity(intent);
                 }
             }
         });
