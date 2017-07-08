@@ -48,7 +48,7 @@ public class Question implements Serializable {
         return mAnswerArrayList;
     }
 
-    public Question(String title, String body, String name, String uid, String questionUid, int genre, int like, byte[] bytes, ArrayList<Answer> answers) {
+    public Question(String title, String body, String name, String uid, String questionUid, int genre, byte[] bytes, ArrayList<Answer> answers) {
         mTitle = title;
         mBody = body;
         mName = name;

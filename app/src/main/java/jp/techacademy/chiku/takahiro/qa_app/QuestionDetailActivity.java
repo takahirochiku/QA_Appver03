@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -129,14 +130,14 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 InputMethodManager im = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); //キーボードを隠す
 
-                if (mQuestionUid == null) {
+                if (mQuestionUid  == null) {
 
                     // Preferenceから名前を取る
                     SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(QuestionDetailActivity.this);
                     String name = sp.getString(Const.NameKEY, "");
 
                     mName = name;
-                    mDataBaseReference.child(Const.FavoritesPATH).child(mName).setValue(mQuestionUid);
+                    mDataBaseReference.child(Const.FavoritesPATH).child(mName).setValue(mQuestionUid );
 
                     //DatabaseReference favoriteRef = mDataBaseReference.child(Const.FavoritesPATH).child(String.valueOf(mName)).child(String.valueOf(mQuestionUid));
                     //ConstがFavoriteに、mName階層,QuestionUidを下階層にして登録？
