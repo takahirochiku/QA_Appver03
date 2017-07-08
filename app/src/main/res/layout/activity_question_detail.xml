@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/listView"
         android:text="お気に入り登録"
-        android:id="@+id/likeButton"
+        android:id="@+id/FavoriteButton"
         android:background="@drawable/custom_button"
         android:textColor="@color/colorButtonText" />
 

@@ -111,7 +111,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         if (user == null) {//ログインしていない
             mFavoriteButton.setVisibility(View.GONE); //ボタンを消す
         }else{
-            mFavoriteButton.setVisibility(View.VISIBLE);
+            mFavoriteButton.setVisibility(View.VISIBLE);//ボタンを表示する
         }
 
         mFavoriteButton = (Button) findViewById(R.id.FavoriteButton);
