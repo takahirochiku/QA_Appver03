@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_compter) {
                     mToolbar.setTitle("コンピューター");
                     mGenre = 4;
-                }else if (id == R.id.nav_like) {
+                } else if (id == R.id.nav_favorites) {
                     mToolbar.setTitle("お気に入り");
                     mLike = 1;
                 }
@@ -207,8 +207,9 @@ public class MainActivity extends AppCompatActivity {
                 mLikeRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mLike));
                 mLikeRef.addChildEventListener(mEventListener);
                 return true;
-            }
-        });
+                }
+                });
+
 
     // Firebase
     mDatabaseReference = FirebaseDatabase.getInstance().getReference();
