@@ -182,9 +182,15 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_compter) {
                     mToolbar.setTitle("コンピューター");
                     mGenre = 4;
-               // } else if (id == R.id.nav_favorites) {
-               //     mToolbar.setTitle("お気に入り")
-               //     mLike = 1;
+               } else if (id == R.id.nav_favorites) {
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    if (user == null) {
+                        // ログインしていなければログイン画面に遷移させる
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(getApplicationContext(), FavoritesActivity.class);
+                    }
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -204,22 +210,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
                 });
-
-        mNavfavorites= (item) findViewById(R.id.nav_favorites);
-        mNavfavorites.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user == null) {
-                    // ログインしていなければログイン画面に遷移させる
-                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(getApplicationContext(), FavoritesActivity.class);
-                }
-            }
-            });
-
 
         // Firebase
     mDatabaseReference = FirebaseDatabase.getInstance().getReference();
