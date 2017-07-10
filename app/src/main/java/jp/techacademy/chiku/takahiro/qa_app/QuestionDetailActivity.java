@@ -31,8 +31,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     private ListView mListView;
     private Question mQuestion;
-    private String mName;
-    private Question mQuestionUid;
     private Button mFavoriteButton;
     private QuestionDetailListAdapter mAdapter;
 
@@ -40,6 +38,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private DatabaseReference mFavoritesRef;
     FirebaseAuth mAuth; //FirebaseAuthクラスを定義
     DatabaseReference mDataBaseReference; //データベースへの読み書きに必要なDatabaseReferenceクラスを定義
+    boolean favoriteFlg = false;
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -62,6 +61,40 @@ public class QuestionDetailActivity extends AppCompatActivity {
             Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
             mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    private ChildEventListener mFavoriteseventlistner = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            String favoriteQid = (String) dataSnapshot.getValue();
+            if (favoriteQid == null) {
+                mFavoriteButton.setText("お気に入り登録");
+                favoriteFlg = false;
+            }else{
+                mFavoriteButton.setText("お気に入り解除");
+                favoriteFlg = true;
+            }
         }
 
         @Override
@@ -113,15 +146,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
             mFavoriteButton.setVisibility(View.GONE); //ボタンを消す
         }else{
             mFavoriteButton.setVisibility(View.VISIBLE);//ボタンを表示する
+            mFavoritesRef = mDataBaseReference.child(Const.FavoritesPATH).child(user.getUid()).child(mQuestion.getQuestionUid());
+            mFavoritesRef.addChildEventListener(mFavoriteseventlistner);
         }
 
         mFavoriteButton = (Button) findViewById(R.id.FavoriteButton);
-
-        if (mQuestionUid == null) {
-            mFavoriteButton.setText("お気に入り登録");
-        }else{
-            mFavoriteButton.setText("お気に入り解除");
-        }
 
         mFavoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,28 +159,23 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 InputMethodManager im = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); //キーボードを隠す
 
-                if (mQuestionUid  == null) {
+                if (favoriteFlg == false) {
 
-                    // Preferenceから名前を取る
-                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(QuestionDetailActivity.this);
-                    String name = sp.getString(Const.NameKEY, "");
-
-                    mName = name;
-                    mDataBaseReference.child(Const.FavoritesPATH).child(mName).setValue(mQuestionUid );
-
-                    //DatabaseReference favoriteRef = mDataBaseReference.child(Const.FavoritesPATH).child(String.valueOf(mName)).child(String.valueOf(mQuestionUid));
-                    //ConstがFavoriteに、mName階層,QuestionUidを下階層にして登録？
-
-                    //Map<String, String> data = new HashMap<String, String>();
-                    //data.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    Map<String, String> data = new HashMap<String, String>();
+                    data.put("favoriteQid", mQuestion.getQuestionUid());
+                    mFavoritesRef.setValue(data);
 
                     Snackbar.make(findViewById(android.R.id.content), "登録しました", Snackbar.LENGTH_LONG).show();
+                    mFavoriteButton.setText("お気に入り解除");
 
                 }else {
 
-                    mDataBaseReference.child(Const.FavoritesPATH).child(mName).removeValue();
+                    mFavoritesRef.removeValue();
+                    favoriteFlg = false;
 
                     Snackbar.make(findViewById(android.R.id.content), "解除しました", Snackbar.LENGTH_LONG).show();
+                    mFavoriteButton.setText("お気に入り登録");
+
                 }
             }
         });

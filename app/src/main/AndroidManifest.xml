@@ -25,7 +25,11 @@
         <activity android:name=".SettingActivity" />
         <activity android:name=".QuestionSendActivity" />
         <activity android:name=".QuestionDetailActivity" />
-        <activity android:name=".AnswerSendActivity"></activity>
+        <activity android:name=".AnswerSendActivity" />
+        <activity
+            android:name=".FavoritesActivity"
+            android:label="@string/title_activity_favorites"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

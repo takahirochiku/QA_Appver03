@@ -28,17 +28,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static jp.techacademy.chiku.takahiro.qa_app.R.id.parent;
-
-public class MainActivity extends AppCompatActivity {
+public class FavoritesActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private int mGenre = 0;
-    private int mLike= 0;
+    private int mLike = 0;
+    private Question mQuestion;
 
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
-    private DrawerLayout mNavfavorites;
+    private DatabaseReference mQuestionRef;
+    private DatabaseReference mFavoritesRef;
     private DatabaseReference mLikeRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             HashMap map = (HashMap) dataSnapshot.getValue();
 
             // 変更があったQuestionを探す
-            for (Question question: mQuestionArrayList) {
+            for (Question question : mQuestionArrayList) {
                 if (dataSnapshot.getKey().equals(question.getQuestionUid())) {
                     // このアプリで変更がある可能性があるのは回答(Answer)のみ
                     question.getAnswers().clear();
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // ジャンルを選択していない場合（mGenre == 0）はエラーを表示するだけ
                 if (mGenre == 0) {
-                        Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show();
                     return;
                 }
 
@@ -147,7 +147,8 @@ public class MainActivity extends AppCompatActivity {
 
                 if (user == null) {
                     // ログインしていなければログイン画面に遷移させる
-                   Intent intent = new Intent(getApplicationContext(), LoginActivity.class);startActivity(intent);
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(intent);
                 } else {
                     // ジャンルを渡して質問作成画面を起動する
                     Intent intent = new Intent(getApplicationContext(), QuestionSendActivity.class);
@@ -179,19 +180,13 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_health) {
                     mToolbar.setTitle("健康");
                     mGenre = 3;
-                } else if (id == R.id.nav_compter) {
-                    mToolbar.setTitle("コンピューター");
-                    mGenre = 4;
-               } else if (id == R.id.nav_favorites) {
+                }  else if (id == R.id.nav_favorites) {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     if (user == null) {
                         // ログインしていなければログイン画面に遷移させる
                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(getApplicationContext(), FavoritesActivity.class);
-                        startActivity(intent);
-                    }
+                    } 
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -208,29 +203,39 @@ public class MainActivity extends AppCompatActivity {
                 }
                 mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                 mGenreRef.addChildEventListener(mEventListener);
+
+                mQuestionRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getQuestionUid()));
+                mFavoritesRef = mDatabaseReference.child(Const.FavoritesPATH).child(String.valueOf(mQuestion.getQuestionUid()));
+
+                if (mQuestionRef.equals(mFavoritesRef) ) {
+                    mFavoritesRef.removeEventListener(mEventListener);
+                }
+                mFavoritesRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mLike));
+                mFavoritesRef.addChildEventListener(mEventListener);
                 return true;
             }
-                });
+        });
+
 
         // Firebase
-    mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
-    // ListViewの準備
-    mListView = (ListView) findViewById(R.id.listView);
-    mAdapter = new QuestionsListAdapter(this);
-    mQuestionArrayList = new ArrayList<Question>();
+        // ListViewの準備
+        mListView = (ListView) findViewById(R.id.listView);
+        mAdapter = new QuestionsListAdapter(this);
+        mQuestionArrayList = new ArrayList<Question>();
         mAdapter.notifyDataSetChanged();
 
-     mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // Questionのインスタンスを渡して質問詳細画面を起動する
-            Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
-            intent.putExtra("question", mQuestionArrayList.get(position));
-            startActivity(intent);
-        }
-    });
-}
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Questionのインスタンスを渡して質問詳細画面を起動する
+                Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
+                intent.putExtra("question", mQuestionArrayList.get(position));
+                startActivity(intent);
+            }
+        });
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -256,3 +261,4 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+
