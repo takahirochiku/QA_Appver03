@@ -32,21 +32,22 @@ public class FavoritesActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private int mGenre = 0;
-    private int mLike = 0;
+    private String mUserId;
     private Question mQuestion;
 
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
     private DatabaseReference mQuestionRef;
     private DatabaseReference mFavoritesRef;
-    private DatabaseReference mLikeRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
+    private ArrayList<Question> mFavoritesArrayList;
     private QuestionsListAdapter mAdapter;
 
-    private ChildEventListener mEventListener = new ChildEventListener() {
+    private ChildEventListener mFavoritesListner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
             HashMap map = (HashMap) dataSnapshot.getValue();
             String title = (String) map.get("title");
             String body = (String) map.get("body");
@@ -73,20 +74,27 @@ public class FavoritesActivity extends AppCompatActivity {
                 }
             }
 
-            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
-            mQuestionArrayList.add(question);
-            mAdapter.notifyDataSetChanged();
-        }
+            private ChildEventListener mEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    if () {
+                    } ;
 
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            HashMap map = (HashMap) dataSnapshot.getValue();
 
-            // 変更があったQuestionを探す
-            for (Question question : mQuestionArrayList) {
-                if (dataSnapshot.getKey().equals(question.getQuestionUid())) {
-                    // このアプリで変更がある可能性があるのは回答(Answer)のみ
-                    question.getAnswers().clear();
+                    HashMap map = (HashMap) dataSnapshot.getValue();
+                    String title = (String) map.get("title");
+                    String body = (String) map.get("body");
+                    String name = (String) map.get("name");
+                    String uid = (String) map.get("uid");
+                    String imageString = (String) map.get("image");
+                    byte[] bytes;
+                    if (imageString != null) {
+                        bytes = Base64.decode(imageString, Base64.DEFAULT);
+                    } else {
+                        bytes = new byte[0];
+                    }
+
+                    ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
                     HashMap answerMap = (HashMap) map.get("answers");
                     if (answerMap != null) {
                         for (Object key : answerMap.keySet()) {
@@ -95,42 +103,73 @@ public class FavoritesActivity extends AppCompatActivity {
                             String answerName = (String) temp.get("name");
                             String answerUid = (String) temp.get("uid");
                             Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
-                            question.getAnswers().add(answer);
+                            answerArrayList.add(answer);
                         }
                     }
 
+                    Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+                    mQuestionArrayList.add(question);
                     mAdapter.notifyDataSetChanged();
                 }
-            }
-        }
 
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    HashMap map = (HashMap) dataSnapshot.getValue();
 
-        }
+                    // 変更があったQuestionを探す
+                    for (Question question : mQuestionArrayList) {
+                        if (dataSnapshot.getKey().equals(question.getQuestionUid())) {
+                            // このアプリで変更がある可能性があるのは回答(Answer)のみ
+                            question.getAnswers().clear();
+                            HashMap answerMap = (HashMap) map.get("answers");
+                            if (answerMap != null) {
+                                for (Object key : answerMap.keySet()) {
+                                    HashMap temp = (HashMap) answerMap.get((String) key);
+                                    String answerBody = (String) temp.get("body");
+                                    String answerName = (String) temp.get("name");
+                                    String answerUid = (String) temp.get("uid");
+                                    Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
+                                    question.getAnswers().add(answer);
+                                }
+                            }
 
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
 
-        }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
+                }
 
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
         }
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_favorites);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
-        dataBaseReference.child("aaaa").child("1").setValue("こんにちは!");
-        dataBaseReference.child("aaaa").child("2").setValue("Firebase");
-        dataBaseReference.child("aaaa").child("3").setValue("なかなか難しいですね");
+        //intentでUserIDを持ってくる
+        Bundle extras = getIntent().getExtras();
+        mUserId = extras.getString("userid");
+
+        //getReferanceの処理
+        // Firebase
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -138,12 +177,12 @@ public class FavoritesActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // ジャンルを選択していない場合（mGenre == 0）はエラーを表示するだけ
                 if (mGenre == 0) {
-                    Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(view, "ボタンは無効です", Snackbar.LENGTH_LONG).show();
                     return;
                 }
 
                 // ログイン済みのユーザーを取得する
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+              /*  FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                 if (user == null) {
                     // ログインしていなければログイン画面に遷移させる
@@ -163,68 +202,80 @@ public class FavoritesActivity extends AppCompatActivity {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name);
         drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        toggle.syncState();*/
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+              // Listviewの準備　find by id Listの名前
+        /*NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
                 if (id == R.id.nav_hobby) {
-                    mToolbar.setTitle("趣味");
-                    mGenre = 1;
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("genre",1);
+                    startActivity(intent);
                 } else if (id == R.id.nav_life) {
-                    mToolbar.setTitle("生活");
-                    mGenre = 2;
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("genre",2);
+                    startActivity(intent);
                 } else if (id == R.id.nav_health) {
-                    mToolbar.setTitle("健康");
-                    mGenre = 3;
-                }  else if (id == R.id.nav_favorites) {
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("genre",3);
+                    startActivity(intent);
+                } else if (id == R.id.nav_favorites) {
+                    mToolbar.setTitle("お気に入り");
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     if (user == null) {
                         // ログインしていなければログイン画面に遷移させる
                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(intent);
-                    } 
+                    }
+                }*/
+
+                    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                    drawer.closeDrawer(GravityCompat.START);
+
+                // ListViewの準備 //Adapter準備
+                mListView = (ListView) findViewById(R.id.listView);
+                mAdapter = new QuestionsListAdapter(this);
+                mQuestionArrayList = new ArrayList<Question>();
+                mAdapter.notifyDataSetChanged();
+
+                    // Qurestionarraylist初期化// Favorritesarraylist初期化
+                    //Adapterを作る
+                    // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+                    mQuestionArrayList.clear();
+                    mFavoritesArrayList.clear();
+                    mAdapter.setQuestionArrayList(mQuestionArrayList);
+                    mListView.setAdapter(mAdapter);
+
+                    // 選択したジャンルにリスナーを登録する
+                    /*if (mGenreRef != null) {
+                        mGenreRef.removeEventListener(mEventListener);
+                    }
+                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                    mGenreRef.addChildEventListener(mEventListener);
+                    return true;*/
+
+                //FavorriteRefのChildlistner
+                if (mFavoritesRef != null) {
+                    mFavoritesRef.removeEventListener(mFavoritesListner);
                 }
-
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
-
-                // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-                mQuestionArrayList.clear();
-                mAdapter.setQuestionArrayList(mQuestionArrayList);
-                mListView.setAdapter(mAdapter);
-
-                // 選択したジャンルにリスナーを登録する
-                if (mGenreRef != null) {
-                    mGenreRef.removeEventListener(mEventListener);
+                mFavoritesRef = mDatabaseReference.child(Const.FavoritesPATH).child(mUserId);
+                mFavoritesRef.addChildEventListener(mFavoritesListner);
+                //return true;
                 }
-                mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
-                mGenreRef.addChildEventListener(mEventListener);
-
-                mQuestionRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getQuestionUid()));
-                mFavoritesRef = mDatabaseReference.child(Const.FavoritesPATH).child(String.valueOf(mQuestion.getQuestionUid()));
-
-                if (mQuestionRef.equals(mFavoritesRef) ) {
-                    mFavoritesRef.removeEventListener(mEventListener);
-                }
-                mFavoritesRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mLike));
-                mFavoritesRef.addChildEventListener(mEventListener);
-                return true;
-            }
-        });
+            });
 
 
-        // Firebase
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
 
         // ListViewの準備
-        mListView = (ListView) findViewById(R.id.listView);
-        mAdapter = new QuestionsListAdapter(this);
-        mQuestionArrayList = new ArrayList<Question>();
-        mAdapter.notifyDataSetChanged();
+       // mListView = (ListView) findViewById(R.id.listView);
+        //mAdapter = new QuestionsListAdapter(this);
+        //mQuestionArrayList = new ArrayList<Question>();
+        //mAdapter.notifyDataSetChanged();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
