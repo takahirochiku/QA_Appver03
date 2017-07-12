@@ -33,11 +33,8 @@ public class FavoritesActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private int mGenre = 0;
     private String mUserId;
-    private Question mQuestion;
 
     private DatabaseReference mDatabaseReference;
-    private DatabaseReference mGenreRef;
-    private DatabaseReference mQuestionRef;
     private DatabaseReference mFavoritesRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
@@ -48,69 +45,43 @@ public class FavoritesActivity extends AppCompatActivity {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-            HashMap map = (HashMap) dataSnapshot.getValue();
-            String title = (String) map.get("title");
-            String body = (String) map.get("body");
-            String name = (String) map.get("name");
-            String uid = (String) map.get("uid");
-            String imageString = (String) map.get("image");
-            byte[] bytes;
-            if (imageString != null) {
-                bytes = Base64.decode(imageString, Base64.DEFAULT);
-            } else {
-                bytes = new byte[0];
-            }
+           for(Question questionUid: mQuestionArrayList ){
 
-            ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
-            HashMap answerMap = (HashMap) map.get("answers");
-            if (answerMap != null) {
-                for (Object key : answerMap.keySet()) {
-                    HashMap temp = (HashMap) answerMap.get((String) key);
-                    String answerBody = (String) temp.get("body");
-                    String answerName = (String) temp.get("name");
-                    String answerUid = (String) temp.get("uid");
-                    Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
-                    answerArrayList.add(answer);
+               equals(mFavoritesRef);
+
+                HashMap map = (HashMap) dataSnapshot.getValue();
+                String title = (String) map.get("title");
+                String body = (String) map.get("body");
+                String name = (String) map.get("name");
+                String uid = (String) map.get("uid");
+                String imageString = (String) map.get("image");
+                byte[] bytes;
+                if (imageString != null) {
+                    bytes = Base64.decode(imageString, Base64.DEFAULT);
+                } else {
+                    bytes = new byte[0];
                 }
-            }
 
-            private ChildEventListener mEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    if () {
-                    } ;
-
-
-                    HashMap map = (HashMap) dataSnapshot.getValue();
-                    String title = (String) map.get("title");
-                    String body = (String) map.get("body");
-                    String name = (String) map.get("name");
-                    String uid = (String) map.get("uid");
-                    String imageString = (String) map.get("image");
-                    byte[] bytes;
-                    if (imageString != null) {
-                        bytes = Base64.decode(imageString, Base64.DEFAULT);
-                    } else {
-                        bytes = new byte[0];
+                ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
+                HashMap answerMap = (HashMap) map.get("answers");
+                if (answerMap != null) {
+                    for (Object key : answerMap.keySet()) {
+                        HashMap temp = (HashMap) answerMap.get((String) key);
+                        String answerBody = (String) temp.get("body");
+                        String answerName = (String) temp.get("name");
+                        String answerUid = (String) temp.get("uid");
+                        Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
+                        answerArrayList.add(answer);
                     }
-
-                    ArrayList<Answer> answerArrayList = new ArrayList<Answer>();
-                    HashMap answerMap = (HashMap) map.get("answers");
-                    if (answerMap != null) {
-                        for (Object key : answerMap.keySet()) {
-                            HashMap temp = (HashMap) answerMap.get((String) key);
-                            String answerBody = (String) temp.get("body");
-                            String answerName = (String) temp.get("name");
-                            String answerUid = (String) temp.get("uid");
-                            Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
-                            answerArrayList.add(answer);
-                        }
-                    }
-
-                    Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
-                    mQuestionArrayList.add(question);
-                    mAdapter.notifyDataSetChanged();
                 }
+
+                Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+                mQuestionArrayList.add(question);
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+
+
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -153,8 +124,7 @@ public class FavoritesActivity extends AppCompatActivity {
 
                 }
             };
-        }
-    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,18 +141,36 @@ public class FavoritesActivity extends AppCompatActivity {
         // Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
+        // ListViewの準備
+        mListView = (ListView) findViewById(R.id.listView);
+
+        //Adapterの初期化
+        mAdapter = new QuestionsListAdapter(this);
+        mQuestionArrayList = new ArrayList<Question>();
+
+
+        // Qurestionarraylist初期化
+        // Favorritesarraylist初期化
+        //Adapterを作る(ListViewにsetAdapter()する）
+        // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+        mQuestionArrayList.clear();
+        //mFavoritesArrayList.clear();
+        mListView.setAdapter(mAdapter);
+        mAdapter.setQuestionArrayList(mQuestionArrayList);
+        mAdapter.notifyDataSetChanged();
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // ジャンルを選択していない場合（mGenre == 0）はエラーを表示するだけ
                 if (mGenre == 0) {
-                    Snackbar.make(view, "ボタンは無効です", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(view, "ジャンルを選択してください", Snackbar.LENGTH_LONG).show();
                     return;
                 }
 
                 // ログイン済みのユーザーを取得する
-              /*  FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                 if (user == null) {
                     // ログインしていなければログイン画面に遷移させる
@@ -202,10 +190,10 @@ public class FavoritesActivity extends AppCompatActivity {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name);
         drawer.addDrawerListener(toggle);
-        toggle.syncState();*/
+        toggle.syncState();
 
               // Listviewの準備　find by id Listの名前
-        /*NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -231,24 +219,10 @@ public class FavoritesActivity extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(intent);
                     }
-                }*/
+                }
 
                     DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                     drawer.closeDrawer(GravityCompat.START);
-
-                // ListViewの準備 //Adapter準備
-                mListView = (ListView) findViewById(R.id.listView);
-                mAdapter = new QuestionsListAdapter(this);
-                mQuestionArrayList = new ArrayList<Question>();
-                mAdapter.notifyDataSetChanged();
-
-                    // Qurestionarraylist初期化// Favorritesarraylist初期化
-                    //Adapterを作る
-                    // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-                    mQuestionArrayList.clear();
-                    mFavoritesArrayList.clear();
-                    mAdapter.setQuestionArrayList(mQuestionArrayList);
-                    mListView.setAdapter(mAdapter);
 
                     // 選択したジャンルにリスナーを登録する
                     /*if (mGenreRef != null) {
@@ -262,20 +236,13 @@ public class FavoritesActivity extends AppCompatActivity {
                 if (mFavoritesRef != null) {
                     mFavoritesRef.removeEventListener(mFavoritesListner);
                 }
+                //Contentsからデータを持ってくる
                 mFavoritesRef = mDatabaseReference.child(Const.FavoritesPATH).child(mUserId);
                 mFavoritesRef.addChildEventListener(mFavoritesListner);
-                //return true;
+                // mFavoritesRefを実行
+                return true;
                 }
             });
-
-
-
-
-        // ListViewの準備
-       // mListView = (ListView) findViewById(R.id.listView);
-        //mAdapter = new QuestionsListAdapter(this);
-        //mQuestionArrayList = new ArrayList<Question>();
-        //mAdapter.notifyDataSetChanged();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

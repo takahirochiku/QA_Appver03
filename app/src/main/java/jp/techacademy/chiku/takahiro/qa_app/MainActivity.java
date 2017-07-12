@@ -34,14 +34,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private int mGenre = 0;
-    private int mLike= 0;
 
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
-    private DrawerLayout mNavfavorites;
-    private DatabaseReference mLikeRef;
     private ListView mListView;
-    private ArrayList<Question> mQuestionArrayList;
+    public static ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
 
     private ChildEventListener mEventListener = new ChildEventListener() {
