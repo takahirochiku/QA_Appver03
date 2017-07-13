@@ -26,9 +26,11 @@ public class QuestionsListAdapter extends BaseAdapter{
 
     @Override
     public int getCount() {
-        return mQuestionArrayList.size();
+        if(mQuestionArrayList!=null){
+            return mQuestionArrayList.size();
+        }
+        return 0;
     }
-
     @Override
     public Object getItem(int position) {
         return mQuestionArrayList.get(position);
