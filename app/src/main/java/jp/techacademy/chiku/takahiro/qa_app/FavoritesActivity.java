@@ -115,8 +115,7 @@ public class FavoritesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_favorites);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        mToolbar.setTitle("お気に入り");
-
+       
         //intentでUserIDを持ってくる
         Bundle extras = getIntent().getExtras();
         mUserId = extras.getString("userid");
