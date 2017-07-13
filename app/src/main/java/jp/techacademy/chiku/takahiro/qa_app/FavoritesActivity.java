@@ -24,6 +24,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static jp.techacademy.chiku.takahiro.qa_app.MainActivity.mQuestionArrayList;
+
 public class FavoritesActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private int mGenre = 0;
@@ -31,13 +34,13 @@ public class FavoritesActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mFavoritesRef;
     private ListView mListView;
-    private ArrayList<Question> mQuestionArrayList;
+    //private ArrayList<Question> mQuestionArrayList;
     private ArrayList<Question> mFavoritesArrayList;
     private QuestionsListAdapter mAdapter;
     private ChildEventListener mFavoritesListner = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            for(Question questionUid: mQuestionArrayList ){
+           for(Question questionUid: mQuestionArrayList ){
                 equals(mFavoritesRef);
                 HashMap map = (HashMap) dataSnapshot.getValue();
                 String title = (String) map.get("title");
@@ -68,6 +71,7 @@ public class FavoritesActivity extends AppCompatActivity {
                 //mQuestionArrayList.add(question);
                 mAdapter.notifyDataSetChanged();
             }
+
         }
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -111,18 +115,24 @@ public class FavoritesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_favorites);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+        mToolbar.setTitle("お気に入り");
+
         //intentでUserIDを持ってくる
         Bundle extras = getIntent().getExtras();
         mUserId = extras.getString("userid");
+
         //getReferanceの処理
         // Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
         // ListViewの準備
         mListView = (ListView) findViewById(R.id.listView);
+
         //Adapterの初期化
         mAdapter = new QuestionsListAdapter(this);
-        mQuestionArrayList = new ArrayList<Question>();
+        //mQuestionArrayList = new ArrayList<Question>();
         mFavoritesArrayList = new ArrayList<Question>();
+
         // Qurestionarraylist初期化
         // Favorritesarraylist初期化
         //Adapterを作る(ListViewにsetAdapter()する）
@@ -130,8 +140,19 @@ public class FavoritesActivity extends AppCompatActivity {
         mQuestionArrayList.clear();
         mFavoritesArrayList.clear();
         mListView.setAdapter(mAdapter);
+
+        //Contentsからデータを持ってくる
+        mFavoritesRef = mDatabaseReference.child(Const.FavoritesPATH).child(mUserId);
+
+        // mFavoritesRefを実行
+        mFavoritesRef.addChildEventListener(mFavoritesListner);
+
+        //adapterにsetList()する
         mAdapter.setQuestionArrayList(mFavoritesArrayList);
+
+        //notifyDataSetChanged()する
         mAdapter.notifyDataSetChanged();
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,11 +227,6 @@ public class FavoritesActivity extends AppCompatActivity {
                 if (mFavoritesRef != null) {
                     mFavoritesRef.removeEventListener(mFavoritesListner);
                 }
-
-                //Contentsからデータを持ってくる
-                mFavoritesRef = mDatabaseReference.child(Const.FavoritesPATH).child(mUserId);
-                // mFavoritesRefを実行
-                mFavoritesRef.addChildEventListener(mFavoritesListner);
                 return true;
             }
         });
